@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+
+    <div class="mt-4 d-flex justify-content-center gap-3">
+        <a asp-controller="Courses"
+           asp-action="Index"
+           class="btn btn-primary">
+            Courses
+        </a>
+
+        <a asp-controller="Students"
+           asp-action="Index"
+           class="btn btn-success">
+            Students
+        </a>
+
+        <a asp-controller="Enrollments"
+           asp-action="Index"
+           class="btn btn-danger">
+            Enrollments
+        </a>
+
+        <a asp-controller="Teachers"
+           asp-action="Index"
+           class="btn btn-warning">
+            Teachers
+        </a>
+    </div>
+</div>

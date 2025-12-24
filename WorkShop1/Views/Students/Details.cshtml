@@ -1,0 +1,116 @@
+﻿@model WorkShop1.Models.Student
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Student</h4>
+
+    @if (!string.IsNullOrEmpty(Model.ImageUrl)) // img
+    {
+        <div class="mb-3">
+            <img src="@Model.ImageUrl"
+                 class="img-thumbnail"
+                 style="max-width:200px;" />
+        </div>
+    }
+    <hr />
+
+    <dl class="row">
+        <dt class="col-sm-2">Student ID</dt>
+        <dd class="col-sm-10">@Model.StudentId</dd>
+
+        <dt class="col-sm-2">First Name</dt>
+        <dd class="col-sm-10">@Model.FirstName</dd>
+
+        <dt class="col-sm-2">Last Name</dt>
+        <dd class="col-sm-10">@Model.LastName</dd>
+
+        <dt class="col-sm-2">Enrollment Date</dt>
+        <dd class="col-sm-10">@Model.EnrollmentDate</dd>
+
+        <dt class="col-sm-2">Credits</dt>
+        <dd class="col-sm-10">@Model.AcquiredCredits</dd>
+
+        <dt class="col-sm-2">Current Semester</dt>
+        <dd class="col-sm-10">@Model.CurrentSemester</dd>
+    </dl>
+
+    <hr />
+    <h4>Enrolled Courses</h4>
+
+    @if (Model.Enrollments != null && Model.Enrollments.Any())
+    {
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Course</th>
+                    <th>Semester</th>
+                    <th>Upload Seminar</th>
+                    <th>Attached File</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var enrollment in Model.Enrollments)
+                {
+                    <tr>
+                        <td>@enrollment.Course?.Title</td>
+                        <td>@enrollment.Semester</td>
+
+                        <!-- UPLOAD -->
+                        <td>
+                            <form asp-controller="Enrollments"
+                                  asp-action="Edit"
+                                  method="post"
+                                  enctype="multipart/form-data">
+
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden" name="Id" value="@enrollment.Id" />
+                                <input type="hidden" name="StudentId" value="@enrollment.StudentId" />
+                                <input type="hidden" name="CourseId" value="@enrollment.CourseId" />
+
+                                <input type="file"
+                                       name="SeminarFile"
+                                       accept=".pdf,.doc,.docx" />
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-primary">
+                                    Upload
+                                </button>
+                            </form>
+                        </td>
+
+                        <!-- FILE -->
+                        <td>
+                            @if (!string.IsNullOrEmpty(enrollment.SeminarUrl))
+                            {
+                                <a href="@enrollment.SeminarUrl"
+                                   target="_blank"
+                                    class="text-decoration-none">
+                                    Open attachment
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">No file</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p><em>This student is not enrolled in any courses.</em></p>
+    }
+</div>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
