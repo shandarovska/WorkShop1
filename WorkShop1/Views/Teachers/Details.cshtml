@@ -1,62 +1,114 @@
 ﻿@model WorkShop1.Models.Teacher
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Teacher Details";
 }
 
-<h1>Details</h1>
+<h1>Teacher Details</h1>
 
-<div>
-    <h4>Teacher</h4>
-    @if (!string.IsNullOrEmpty(Model.ImageUrl)) //slika
-    {
-        <div class="mb-3">
-            <img src="@Model.ImageUrl"
-                 class="img-thumbnail"
-                 style="max-width:200px;" />
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+
+        @* Profile image *@
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" class="img-thumbnail mb-3" style="max-width: 100%;" />
+        }
+
+        <div class="card">
+            <div class="card-header">
+                <strong>Teacher info</strong>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-5">@Html.DisplayNameFor(m => m.FirstName)</dt>
+                    <dd class="col-7">@Html.DisplayFor(m => m.FirstName)</dd>
+
+                    <dt class="col-5">@Html.DisplayNameFor(m => m.LastName)</dt>
+                    <dd class="col-7">@Html.DisplayFor(m => m.LastName)</dd>
+
+                    <dt class="col-5">@Html.DisplayNameFor(m => m.Degree)</dt>
+                    <dd class="col-7">@Html.DisplayFor(m => m.Degree)</dd>
+
+                    <dt class="col-5">@Html.DisplayNameFor(m => m.AcademicRank)</dt>
+                    <dd class="col-7">@Html.DisplayFor(m => m.AcademicRank)</dd>
+
+                    <dt class="col-5">@Html.DisplayNameFor(m => m.OfficeNumber)</dt>
+                    <dd class="col-7">@Html.DisplayFor(m => m.OfficeNumber)</dd>
+
+                    <dt class="col-5">@Html.DisplayNameFor(m => m.HireDate)</dt>
+                    <dd class="col-7">@Html.DisplayFor(m => m.HireDate)</dd>
+                </dl>
+            </div>
         </div>
-    }
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FirstName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FirstName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Degree)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Degree)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AcademicRank)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AcademicRank)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.OfficeNumber)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.OfficeNumber)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HireDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HireDate)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+        @* ADMIN: Linking *@
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="card mt-3">
+                <div class="card-header">
+                    <strong>Linked account</strong>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.LinkedUserEmail != null)
+                    {
+                        <div class="mb-2">
+                            <span class="badge bg-success">Linked</span>
+                            <div><strong>@ViewBag.LinkedUserEmail</strong></div>
+                        </div>
+
+                        <form asp-controller="Teachers" asp-action="UnassignTeacher" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="teacherId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                Unassign (remove link)
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <span class="badge bg-secondary">Not linked</span>
+                            <div class="text-muted small">
+                                Assign an existing registered user (email) to this teacher.
+                            </div>
+                        </div>
+
+                        <form asp-controller="Teachers" asp-action="AssignTeacher" method="post" class="row g-2">
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden" name="teacherId" value="@Model.Id" />
+
+                            <div class="col-12">
+                                <label class="form-label">User email</label>
+                                <input type="email" name="email" class="form-control" placeholder="user@email.com" required />
+                            </div>
+
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    Assign teacher to this email
+                                </button>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-8">
+        <div class="mt-2">
+            <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+            <a class="btn btn-link" asp-action="Index">Back to List</a>
+        </div>
+    </div>
 </div>

@@ -1,116 +1,185 @@
 ﻿@model WorkShop1.Models.Student
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Student Details";
 }
 
-<h1>Details</h1>
+<h1>Student Details</h1>
 
-<div>
-    <h4>Student</h4>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
 
-    @if (!string.IsNullOrEmpty(Model.ImageUrl)) // img
-    {
-        <div class="mb-3">
-            <img src="@Model.ImageUrl"
-                 class="img-thumbnail"
-                 style="max-width:200px;" />
+<div class="row g-4">
+    <div class="col-lg-4">
+
+        @* Profile image *@
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" class="img-thumbnail mb-3" style="max-width: 100%;" />
+        }
+
+        <div class="card">
+            <div class="card-header">
+                <strong>Student info</strong>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-5">Index</dt>
+                    <dd class="col-7">@Model.StudentId</dd>
+
+                    <dt class="col-5">First name</dt>
+                    <dd class="col-7">@Model.FirstName</dd>
+
+                    <dt class="col-5">Last name</dt>
+                    <dd class="col-7">@Model.LastName</dd>
+
+                    <dt class="col-5">Credits</dt>
+                    <dd class="col-7">@Model.AcquiredCredits</dd>
+
+                    <dt class="col-5">Semester</dt>
+                    <dd class="col-7">@Model.CurrentSemester</dd>
+
+                    <dt class="col-5">Level</dt>
+                    <dd class="col-7">@Model.EducationLevel</dd>
+                </dl>
+            </div>
         </div>
-    }
-    <hr />
 
-    <dl class="row">
-        <dt class="col-sm-2">Student ID</dt>
-        <dd class="col-sm-10">@Model.StudentId</dd>
+        @* ADMIN: Linking *@
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="card mt-3">
+                <div class="card-header">
+                    <strong>Linked account</strong>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.LinkedUserEmail != null)
+                    {
+                        <div class="mb-2">
+                            <span class="badge bg-success">Linked</span>
+                            <div><strong>@ViewBag.LinkedUserEmail</strong></div>
+                        </div>
 
-        <dt class="col-sm-2">First Name</dt>
-        <dd class="col-sm-10">@Model.FirstName</dd>
+                        <form asp-controller="Students" asp-action="UnassignStudent" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="studentId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                Unassign (remove link)
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <span class="badge bg-secondary">Not linked</span>
+                            <div class="text-muted small">Assign an existing registered user (email) to this student.</div>
+                        </div>
 
-        <dt class="col-sm-2">Last Name</dt>
-        <dd class="col-sm-10">@Model.LastName</dd>
+                        <form asp-controller="Students" asp-action="AssignStudent" method="post" class="row g-2">
+                            @Html.AntiForgeryToken()
 
-        <dt class="col-sm-2">Enrollment Date</dt>
-        <dd class="col-sm-10">@Model.EnrollmentDate</dd>
+                            <input type="hidden" name="studentId" value="@Model.Id" />
 
-        <dt class="col-sm-2">Credits</dt>
-        <dd class="col-sm-10">@Model.AcquiredCredits</dd>
+                            <div class="col-12">
+                                <label class="form-label">User email</label>
+                                <input type="email" name="email" class="form-control" placeholder="user@email.com" required />
+                            </div>
 
-        <dt class="col-sm-2">Current Semester</dt>
-        <dd class="col-sm-10">@Model.CurrentSemester</dd>
-    </dl>
-
-    <hr />
-    <h4>Enrolled Courses</h4>
-
-    @if (Model.Enrollments != null && Model.Enrollments.Any())
-    {
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Course</th>
-                    <th>Semester</th>
-                    <th>Upload Seminar</th>
-                    <th>Attached File</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var enrollment in Model.Enrollments)
-                {
-                    <tr>
-                        <td>@enrollment.Course?.Title</td>
-                        <td>@enrollment.Semester</td>
-
-                        <!-- UPLOAD -->
-                        <td>
-                            <form asp-controller="Enrollments"
-                                  asp-action="Edit"
-                                  method="post"
-                                  enctype="multipart/form-data">
-
-                                @Html.AntiForgeryToken()
-
-                                <input type="hidden" name="Id" value="@enrollment.Id" />
-                                <input type="hidden" name="StudentId" value="@enrollment.StudentId" />
-                                <input type="hidden" name="CourseId" value="@enrollment.CourseId" />
-
-                                <input type="file"
-                                       name="SeminarFile"
-                                       accept=".pdf,.doc,.docx" />
-
-                                <button type="submit"
-                                        class="btn btn-sm btn-primary">
-                                    Upload
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    Assign student to this email
                                 </button>
-                            </form>
-                        </td>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
 
-                        <!-- FILE -->
-                        <td>
-                            @if (!string.IsNullOrEmpty(enrollment.SeminarUrl))
-                            {
-                                <a href="@enrollment.SeminarUrl"
-                                   target="_blank"
-                                    class="text-decoration-none">
-                                    Open attachment
-                                </a>
-                            }
-                            else
-                            {
-                                <span class="text-muted">No file</span>
-                            }
-                        </td>
-                    </tr>
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <strong>Enrolled Courses</strong>
+            </div>
+            <div class="card-body">
+                @if (Model.Enrollments != null && Model.Enrollments.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Semester</th>
+                                    <th>Year</th>
+                                    <th style="width:260px;">Upload Seminar</th>
+                                    <th style="width:180px;">Attached File</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var enrollment in Model.Enrollments)
+                                {
+                                    <tr>
+                                        <td>@enrollment.Course?.Title</td>
+                                        <td>@enrollment.Semester</td>
+                                        <td>@enrollment.Year</td>
+
+                                        <td>
+                                            <form asp-controller="Enrollments"
+                                                  asp-action="Edit"
+                                                  method="post"
+                                                  enctype="multipart/form-data"
+                                                  class="d-flex flex-column gap-1">
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden" name="Id" value="@enrollment.Id" />
+                                                <input type="hidden" name="CourseId" value="@enrollment.CourseId" />
+                                                <input type="hidden" name="StudentId" value="@enrollment.StudentId" />
+
+                                                <input type="file" name="SeminarFile" class="form-control form-control-sm"
+                                                       accept=".pdf,.doc,.docx" />
+
+                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                    Upload / Replace
+                                                </button>
+                                            </form>
+                                        </td>
+
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(enrollment.SeminarUrl))
+                                            {
+                                                <div><strong>@enrollment.SeminarOriginalName</strong></div>
+                                                <a href="@enrollment.SeminarUrl" target="_blank" class="text-decoration-none">
+                                                    View file
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">No file</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <p><em>This student is not enrolled in any courses.</em></p>
-    }
-</div>
+                else
+                {
+                    <p class="mb-0"><em>This student is not enrolled in any courses.</em></p>
+                }
+            </div>
+        </div>
 
-<div class="mt-3">
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+        <div class="mt-3">
+            <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+            <a class="btn btn-link" asp-action="Index">Back to List</a>
+        </div>
+    </div>
 </div>

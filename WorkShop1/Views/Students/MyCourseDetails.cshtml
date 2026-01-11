@@ -1,0 +1,106 @@
+﻿@model WorkShop1.Models.ViewModels.StudentEnrollmentEditVM
+
+@{
+    ViewData["Title"] = "Course Enrollment";
+}
+
+<h2>@Model.CourseTitle</h2>
+
+<p class="text-muted mb-0">
+    Year: @(Model.Year?.ToString() ?? "-"),
+    Semester: @(string.IsNullOrWhiteSpace(Model.Semester) ? "-" : Model.Semester)
+</p>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <h5>Editable (Student)</h5>
+
+        <form asp-action="UpdateEnrollment"
+              asp-controller="Students"
+              method="post"
+              enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="EnrollmentId" value="@Model.EnrollmentId" />
+
+            <div class="mb-3">
+                <label class="form-label">Project URL (GitHub repository)</label>
+                <input class="form-control"
+                       name="ProjectUrl"
+                       value="@Model.ProjectUrl"
+                       placeholder="https://github.com/username/repo" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Seminar file (.doc, .docx, .pdf)</label>
+                <input class="form-control"
+                       type="file"
+                       name="SeminarFile"
+                       accept=".doc,.docx,.pdf" />
+
+                <div class="form-text">
+                    Current:
+                    @if (!string.IsNullOrWhiteSpace(Model.SeminarUrl))
+                    {
+                        <a href="@Model.SeminarUrl" target="_blank">
+                            @(!string.IsNullOrWhiteSpace(Model.SeminarOriginalName)
+                                                    ? Model.SeminarOriginalName
+                                                    : Model.SeminarUrl)
+                        </a>
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </div>
+
+                <span class="text-danger">@Html.ValidationMessage("SeminarFile")</span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-secondary" href="/StudentCourses">Back</a>
+        </form>
+    </div>
+
+    <div class="col-md-6">
+        <h5>Read-only status</h5>
+
+        <dl class="row">
+            <dt class="col-sm-6">Exam points</dt>
+            <dd class="col-sm-6">@(@Model.ExamPoints?.ToString() ?? "-")</dd>
+
+            <dt class="col-sm-6">Seminar points</dt>
+            <dd class="col-sm-6">@(@Model.SeminarPoints?.ToString() ?? "-")</dd>
+
+            <dt class="col-sm-6">Project points</dt>
+            <dd class="col-sm-6">@(@Model.ProjectPoints?.ToString() ?? "-")</dd>
+
+            <dt class="col-sm-6">Additional points</dt>
+            <dd class="col-sm-6">@(@Model.AdditionalPoints?.ToString() ?? "-")</dd>
+
+            <dt class="col-sm-6">Grade</dt>
+            <dd class="col-sm-6">@(@Model.Grade?.ToString() ?? "-")</dd>
+
+            <dt class="col-sm-6">Finish date</dt>
+            <dd class="col-sm-6">@(@Model.FinishDate?.ToString("yyyy-MM-dd") ?? "-")</dd>
+
+            <dt class="col-sm-6">Project link</dt>
+            <dd class="col-sm-6">
+                @if (!string.IsNullOrWhiteSpace(Model.ProjectUrl))
+                {
+                    <a href="@Model.ProjectUrl" target="_blank">@Model.ProjectUrl</a>
+                }
+                else
+                {
+                    <span>-</span>
+                }
+            </dd>
+        </dl>
+
+        <p class="text-muted mb-0">
+            Points, grade, and finish date are managed by the teacher.
+        </p>
+    </div>
+</div>

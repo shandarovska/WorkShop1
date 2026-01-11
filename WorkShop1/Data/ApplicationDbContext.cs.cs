@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System.Reflection.Emit;
 using WorkShop1.Models;
 
 namespace WorkShop1.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
@@ -45,9 +46,21 @@ namespace WorkShop1.Data
                 .WithMany(s => s.Enrollments) //eden student ima povekje enrollments
                 .HasForeignKey(e => e.StudentId);
 
+            modelBuilder.Entity<ApplicationUser>() // POVRZUVAME
+                .HasOne(u => u.Student)
+                .WithOne()
+                .HasForeignKey<ApplicationUser>(u => u.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.Teacher)
+                .WithOne()
+                .HasForeignKey<ApplicationUser>(u => u.TeacherId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // teachers
             modelBuilder.Entity<Teacher>().HasData(
-                new Teacher { Id = 1, FirstName = "Ivan", LastName = "Petrovski", Degree = "PhD", AcademicRank = "Professor", OfficeNumber = "A101" },
+                new Teacher { Id = 1, FirstName = "Slavica", LastName = "Pop-Stojanova", Degree = "PhD", AcademicRank = "Proffesor", OfficeNumber = "A126" },
                 new Teacher { Id = 2, FirstName = "Marija", LastName = "Stojanova", Degree = "PhD", AcademicRank = "Associate Professor", OfficeNumber = "A102" },
                 new Teacher { Id = 3, FirstName = "Petar", LastName = "Kostov", Degree = "MSc", AcademicRank = "Assistant", OfficeNumber = "B201" },
                 new Teacher { Id = 4, FirstName = "Ana", LastName = "Dimitrova", Degree = "PhD", AcademicRank = "Professor", OfficeNumber = "B202" },
@@ -56,11 +69,11 @@ namespace WorkShop1.Data
 
             // students
             modelBuilder.Entity<Student>().HasData(
-                new Student { Id = 1, StudentId = "201001", FirstName = "Marko", LastName = "Jovanov", CurrentSemester = 3, EducationLevel = "Undergraduate" },
-                new Student { Id = 2, StudentId = "201002", FirstName = "Elena", LastName = "Stojanovska", CurrentSemester = 5, EducationLevel = "Undergraduate" },
-                new Student { Id = 3, StudentId = "201003", FirstName = "Stefan", LastName = "Nikolov", CurrentSemester = 7, EducationLevel = "Undergraduate" },
-                new Student { Id = 4, StudentId = "201004", FirstName = "Ivana", LastName = "Trajkovska", CurrentSemester = 1, EducationLevel = "Undergraduate" },
-                new Student { Id = 5, StudentId = "201005", FirstName = "Bojan", LastName = "Ristov", CurrentSemester = 6, EducationLevel = "Undergraduate" }
+                new Student { Id = 1, StudentId = "1862022", FirstName = "Sandra", LastName = "Shandarovska", CurrentSemester = 3, EducationLevel = "Undergraduate" },
+                new Student { Id = 2, StudentId = "842022", FirstName = "Risto", LastName = "Kizov", CurrentSemester = 5, EducationLevel = "Undergraduate" },
+                new Student { Id = 3, StudentId = "1832023", FirstName = "Teodora", LastName = "Domazetovic", CurrentSemester = 7, EducationLevel = "Undergraduate" },
+                new Student { Id = 4, StudentId = "852022", FirstName = "Kristina", LastName = "Kitrozoska", CurrentSemester = 1, EducationLevel = "Undergraduate" },
+                new Student { Id = 5, StudentId = "1672022", FirstName = "Sara", LastName = "Atanasovska", CurrentSemester = 6, EducationLevel = "Undergraduate" }
             );
 
             // courses

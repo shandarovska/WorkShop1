@@ -1,0 +1,141 @@
+﻿@model WorkShop1.Models.ViewModels.CourseEnrollVM
+@{
+    ViewData["Title"] = "Enroll Students";
+}
+
+<h2>Enroll Students - @Model.CourseTitle</h2>
+
+@if (TempData["EnrollMsg"] != null)
+{
+    <div class="alert alert-info">@TempData["EnrollMsg"]</div>
+}
+
+@* =========================
+   FORM 1: Deactivate (Unenroll) selected
+   ========================= *@
+<h4>Current enrolled students (@Model.Year - @Model.Semester)</h4>
+
+<form asp-action="DeactivateEnrollments" method="post" class="mb-4">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="CourseId" />
+    <input type="hidden" asp-for="Year" />
+    <input type="hidden" asp-for="Semester" />
+
+    <div class="row mb-2">
+        <div class="col-md-3">
+            <label asp-for="FinishDateForDeactivation" class="form-label">Finish date</label>
+            <input asp-for="FinishDateForDeactivation" type="date" class="form-control" />
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-warning">Deactivate selected</button>
+        </div>
+    </div>
+
+    @if (Model.CurrentEnrollments == null || !Model.CurrentEnrollments.Any())
+    {
+        <p class="text-muted">No enrollments for this period.</p>
+    }
+    else
+    {
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th style="width:40px"></th>
+                    <th>Student</th>
+                    <th>Status</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Model.CurrentEnrollments)
+                {
+                    <tr>
+                        <td>
+                            @* allow selecting only ACTIVE enrollments *@
+                            @if (e.FinishDate == null)
+                            {
+                                <input type="checkbox" name="SelectedEnrollmentIds" value="@e.EnrollmentId" />
+                            }
+                        </td>
+                        <td>@e.StudentDisplayName</td>
+                        <td>@(e.FinishDate == null ? "Active" : $"Finished: {e.FinishDate:yyyy-MM-dd}")</td>
+                        <td>@(e.Grade?.ToString() ?? "-")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</form>
+
+<hr />
+
+@* =========================
+   FORM 2: Enroll students
+   ========================= *@
+
+<form asp-action="EnrollStudents" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="CourseId" />
+
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <label asp-for="Year" class="form-label"></label>
+            <input asp-for="Year" class="form-control" />
+            <span asp-validation-for="Year" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3">
+            <label asp-for="Semester" class="form-label"></label>
+            <select asp-for="Semester" class="form-select">
+                <option value="Winter">Winter</option>
+                <option value="Summer">Summer</option>
+            </select>
+            <span asp-validation-for="Semester" class="text-danger"></span>
+        </div>
+    </div>
+
+    <h4>Enroll new students</h4>
+
+    <div class="text-danger mb-2">
+        @Html.ValidationSummary()
+    </div>
+
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th style="width:40px"></th>
+                <th>Student</th>
+                <th style="width:140px">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Students.Count; i++)
+            {
+                <tr>
+                    <td>
+                        <input asp-for="Students[i].Selected" disabled="@(Model.Students[i].AlreadyEnrolled)" />
+                        <input type="hidden" asp-for="Students[i].StudentId" />
+                        <input type="hidden" asp-for="Students[i].DisplayName" />
+                        <input type="hidden" asp-for="Students[i].AlreadyEnrolled" />
+                    </td>
+                    <td>@Model.Students[i].DisplayName</td>
+                    <td>
+                        @if (Model.Students[i].AlreadyEnrolled)
+                        {
+                            <span class="text-muted">Already enrolled</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary">Enroll selected</button>
+    <a asp-action="Details" asp-route-id="@Model.CourseId" class="btn btn-secondary">Back</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

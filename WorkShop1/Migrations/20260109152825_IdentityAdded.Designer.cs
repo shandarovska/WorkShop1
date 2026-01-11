@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WorkShop1.Data;
 
@@ -11,9 +12,11 @@ using WorkShop1.Data;
 namespace WorkShop1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260109152825_IdentityAdded")]
+    partial class IdentityAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -204,12 +207,6 @@ namespace WorkShop1.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("StudentId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int?>("TeacherId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
@@ -226,14 +223,6 @@ namespace WorkShop1.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("StudentId")
-                        .IsUnique()
-                        .HasFilter("[StudentId] IS NOT NULL");
-
-                    b.HasIndex("TeacherId")
-                        .IsUnique()
-                        .HasFilter("[TeacherId] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -366,9 +355,6 @@ namespace WorkShop1.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<string>("SeminarOriginalName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("SeminarPoints")
                         .HasColumnType("int");
 
@@ -487,45 +473,45 @@ namespace WorkShop1.Migrations
                             Id = 1L,
                             CurrentSemester = 3,
                             EducationLevel = "Undergraduate",
-                            FirstName = "Sandra",
-                            LastName = "Shandarovska",
-                            StudentId = "1862022"
+                            FirstName = "Marko",
+                            LastName = "Jovanov",
+                            StudentId = "201001"
                         },
                         new
                         {
                             Id = 2L,
                             CurrentSemester = 5,
                             EducationLevel = "Undergraduate",
-                            FirstName = "Risto",
-                            LastName = "Kizov",
-                            StudentId = "842022"
+                            FirstName = "Elena",
+                            LastName = "Stojanovska",
+                            StudentId = "201002"
                         },
                         new
                         {
                             Id = 3L,
                             CurrentSemester = 7,
                             EducationLevel = "Undergraduate",
-                            FirstName = "Teodora",
-                            LastName = "Domazetovic",
-                            StudentId = "1832023"
+                            FirstName = "Stefan",
+                            LastName = "Nikolov",
+                            StudentId = "201003"
                         },
                         new
                         {
                             Id = 4L,
                             CurrentSemester = 1,
                             EducationLevel = "Undergraduate",
-                            FirstName = "Kristina",
-                            LastName = "Kitrozoska",
-                            StudentId = "852022"
+                            FirstName = "Ivana",
+                            LastName = "Trajkovska",
+                            StudentId = "201004"
                         },
                         new
                         {
                             Id = 5L,
                             CurrentSemester = 6,
                             EducationLevel = "Undergraduate",
-                            FirstName = "Sara",
-                            LastName = "Atanasovska",
-                            StudentId = "1672022"
+                            FirstName = "Bojan",
+                            LastName = "Ristov",
+                            StudentId = "201005"
                         });
                 });
 
@@ -573,11 +559,11 @@ namespace WorkShop1.Migrations
                         new
                         {
                             Id = 1,
-                            AcademicRank = "Proffesor",
+                            AcademicRank = "Professor",
                             Degree = "PhD",
-                            FirstName = "Slavica",
-                            LastName = "Pop-Stojanova",
-                            OfficeNumber = "A126"
+                            FirstName = "Ivan",
+                            LastName = "Petrovski",
+                            OfficeNumber = "A101"
                         },
                         new
                         {
@@ -666,23 +652,6 @@ namespace WorkShop1.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("WorkShop1.Models.ApplicationUser", b =>
-                {
-                    b.HasOne("WorkShop1.Models.Student", "Student")
-                        .WithOne()
-                        .HasForeignKey("WorkShop1.Models.ApplicationUser", "StudentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("WorkShop1.Models.Teacher", "Teacher")
-                        .WithOne()
-                        .HasForeignKey("WorkShop1.Models.ApplicationUser", "TeacherId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Student");
-
-                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("WorkShop1.Models.Course", b =>

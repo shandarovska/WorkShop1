@@ -1,0 +1,200 @@
+﻿@model WorkShop1.Models.ViewModels.TeacherCourseDetailsVM
+
+@{
+    ViewData["Title"] = "Course Details";
+}
+
+<h2>@Model.Course.Title</h2>
+
+<div class="mb-3">
+    <dl class="row">
+        <dt class="col-sm-3">Programme</dt>
+        <dd class="col-sm-9">@Model.Course.Programme</dd>
+
+        <dt class="col-sm-3">Semester</dt>
+        <dd class="col-sm-9">@Model.Course.Semester</dd>
+
+        <dt class="col-sm-3">Credits</dt>
+        <dd class="col-sm-9">@Model.Course.Credits</dd>
+
+        <dt class="col-sm-3">First teacher</dt>
+        <dd class="col-sm-9">@Model.Course.FirstTeacher?.FirstName @Model.Course.FirstTeacher?.LastName</dd>
+
+        <dt class="col-sm-3">Second teacher</dt>
+        <dd class="col-sm-9">@Model.Course.SecondTeacher?.FirstName @Model.Course.SecondTeacher?.LastName</dd>
+    </dl>
+</div>
+
+<hr />
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <h4 class="m-0">Enrolled students</h4>
+
+    <form method="get" action="/TeacherCourses/Details/@Model.Course.Id" class="ms-auto">
+        <label class="me-2">Year:</label>
+        <select name="year" class="form-select d-inline-block" style="width:140px" onchange="this.form.submit()">
+            @foreach (var y in Model.Years)
+            {
+                <option value="@y" selected="@(y == Model.SelectedYear)">@y</option>
+            }
+        </select>
+    </form>
+</div>
+
+@if (Model.Rows == null || !Model.Rows.Any())
+{
+    <p class="text-muted">No enrollments for selected year.</p>
+}
+else
+{
+    <table class="table table-striped table-sm align-middle">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Status</th>
+
+                <th style="width:90px;">Exam</th>
+                <th style="width:90px;">Seminar</th>
+                <th style="width:90px;">Project</th>
+                <th style="width:90px;">Add.</th>
+
+                <th style="width:90px;">Grade</th>
+                <th style="width:160px;">Finish date</th>
+
+                <th>URLs (read-only)</th>
+                <th style="width:90px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model.Rows)
+            {
+                <tr>
+                    <td>@r.StudentDisplay</td>
+
+                    <td>
+                        @if (r.IsActive)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Finished</span>
+                        }
+                    </td>
+
+                    @if (r.IsActive)
+                    {
+                        <td colspan="8">
+                            <form asp-action="UpdateEnrollment" asp-controller="Teachers" method="post" class="row g-2 align-items-center">
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden" name="CourseId" value="@Model.Course.Id" />
+                                <input type="hidden" name="EnrollmentId" value="@r.EnrollmentId" />
+                                <input type="hidden" name="Year" value="@Model.SelectedYear" />
+
+                                <div class="col-auto">
+                                    <input name="ExamPoints" value="@r.ExamPoints" class="form-control form-control-sm" style="width:90px" />
+                                </div>
+
+                                <div class="col-auto">
+                                    <input name="SeminarPoints" value="@r.SeminarPoints" class="form-control form-control-sm" style="width:90px" />
+                                </div>
+
+                                <div class="col-auto">
+                                    <input name="ProjectPoints" value="@r.ProjectPoints" class="form-control form-control-sm" style="width:90px" />
+                                </div>
+
+                                <div class="col-auto">
+                                    <input name="AdditionalPoints" value="@r.AdditionalPoints" class="form-control form-control-sm" style="width:90px" />
+                                </div>
+
+                                <div class="col-auto">
+                                    <input name="Grade" value="@r.Grade" class="form-control form-control-sm" style="width:90px" />
+                                </div>
+
+                                <div class="col-auto">
+                                    <input type="date" name="FinishDate"
+                                           value="@(r.FinishDate.HasValue? r.FinishDate.Value.ToString("yyyy-MM-dd") : "")"
+                                           class="form-control form-control-sm" style="width:160px" />
+                                </div>
+
+                                <div class="col">
+                                    <div class="small text-muted">
+                                        <div>
+                                            Seminar:
+                                            @if (!string.IsNullOrWhiteSpace(r.SeminarUrl))
+                                            {
+                                                <a href="@r.SeminarUrl" target="_blank">@(!string.IsNullOrWhiteSpace(r.SeminarOriginalName) ? r.SeminarOriginalName : r.SeminarUrl)</a>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                        </div>
+
+                                        <div>
+                                            Project:
+                                            @if (!string.IsNullOrWhiteSpace(r.ProjectUrl))
+                                            {
+                                                <a href="@r.ProjectUrl" target="_blank">@r.ProjectUrl</a>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                                </div>
+                            </form>
+                        </td>
+                        <td></td>
+                    }
+                    else
+                    {
+                        <td>@(r.ExamPoints?.ToString() ?? "-")</td>
+                        <td>@(r.SeminarPoints?.ToString() ?? "-")</td>
+                        <td>@(r.ProjectPoints?.ToString() ?? "-")</td>
+                        <td>@(r.AdditionalPoints?.ToString() ?? "-")</td>
+
+                        <td>@(r.Grade?.ToString() ?? "-")</td>
+                        <td>@(r.FinishDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+
+                        <td class="small text-muted">
+                            <div>
+                                Seminar:
+                                @if (!string.IsNullOrWhiteSpace(r.SeminarUrl))
+                                {
+                                    <a href="@r.SeminarUrl" target="_blank">@(!string.IsNullOrWhiteSpace(r.SeminarOriginalName) ? r.SeminarOriginalName : r.SeminarUrl)</a>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </div>
+
+                            <div>
+                                Project:
+                                @if (!string.IsNullOrWhiteSpace(r.ProjectUrl))
+                                {
+                                    <a href="@r.ProjectUrl" target="_blank">@r.ProjectUrl</a>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </div>
+                        </td>
+
+                        <td></td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a href="/TeacherCourses" class="btn btn-secondary">Back to My Courses</a>
